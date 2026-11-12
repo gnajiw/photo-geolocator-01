@@ -1,0 +1,8 @@
+{
+  "name": "photo-geolocator",
+  "version": "1.0.0",
+  "description": "Autonomous geolocation agent for make.fun photo-geolocator-01",
+  "type": "module",
+  "main": "main.ts",
+  "license": "MIT"
+}
