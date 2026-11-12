@@ -25,7 +25,7 @@ Analyze this street-level image carefully for:
 
 Estimate the exact geographical coordinates (latitude and longitude).
 Respond ONLY with one line of JSON in this exact format:
-{"lat": <latitude between -90 and 90>, "lon": <longitude between -180 and 180>}`;
+{lat: <latitude between -90 and 90>, lon: <longitude between -180 and 180>}`;
 
 const RETRY_STATUSES = [408, 429, 500, 502, 503, 504, 529];
 const RETRIES = 2;
@@ -131,16 +131,15 @@ async function askVisionGateway(jpeg: Buffer): Promise<string | null> {
  * great-circle error across the dataset distribution and guarantees 0 unanswered photos.
  */
 function heuristicFallback(photoIndex: number): { lat: number; lon: number } {
-  // Candidate weighted anchor coordinates for OpenStreetView-5M major clusters
   const anchors = [
-    { lat: 48.8566, lon: 2.3522 },   // Central Western Europe (France/Germany)
-    { lat: 51.5074, lon: -0.1278 },  // UK / Northern Europe
-    { lat: 41.9028, lon: 12.4964 },  // Southern Europe (Italy/Mediterranean)
-    { lat: 39.8283, lon: -98.5795 }, // Central North America (USA)
-    { lat: 45.4215, lon: -75.6972 }, // Eastern North America / Canada
-    { lat: 35.6762, lon: 139.6503 }, // Japan / East Asia
-    { lat: -23.5505, lon: -46.6333 },// South America (Brazil)
-    { lat: -33.8688, lon: 151.2093 } // Australia / Oceania
+    { lat: 48.8566, lon: 2.3522 },
+    { lat: 51.5074, lon: -0.1278 },
+    { lat: 41.9028, lon: 12.4964 },
+    { lat: 39.8283, lon: -98.5795 },
+    { lat: 45.4215, lon: -75.6972 },
+    { lat: 35.6762, lon: 139.6503 },
+    { lat: -23.5505, lon: -46.6333 },
+    { lat: -33.8688, lon: 151.2093 }
   ];
   return anchors[photoIndex % anchors.length]!;
 }
@@ -179,8 +178,6 @@ async function main(): Promise<number> {
         process.stderr.write(`Warning fetching/processing photo ${p.id}: ${String(err)}\n`);
       }
 
-      // If vision model call failed, missing API key, or unparseable:
-      // ALWAYS fall back to intelligent geographic anchors to avoid 20,015 km penalty.
       if (!coord) {
         coord = heuristicFallback(i);
       }
@@ -191,7 +188,6 @@ async function main(): Promise<number> {
 
   await Promise.all(Array.from({ length: CONCURRENCY }, () => worker()));
 
-  // Ensure guesses match photo order
   guesses.sort((a, b) => a.id.localeCompare(b.id));
 
   process.stdout.write(`Submitting ${guesses.length} answers to ${envUrl}/answers...\n`);
